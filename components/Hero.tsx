@@ -42,6 +42,40 @@ const DashboardAction = () => {
   );
 };
 
+const DoctorPortalAction = () => {
+  const doctor = useQuery(api.doctors.getCurrentDoctor);
+  const isLoading = doctor === undefined;
+
+  if (isLoading) {
+    return (
+      <Button
+        size="lg"
+        variant="ghost"
+        className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 opacity-80 cursor-wait"
+        disabled
+      >
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        Loading...
+      </Button>
+    );
+  }
+
+  const href = doctor ? "/doctor-dashboard" : "/doctor-registration";
+  const label = doctor ? "Doctor Portal" : "Register as a Doctor";
+
+  return (
+    <Link href={href}>
+      <Button
+        size="lg"
+        variant="ghost"
+        className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+      >
+        {label}
+      </Button>
+    </Link>
+  );
+};
+
 const Hero = () => {
   return (
     <section
@@ -155,15 +189,7 @@ const Hero = () => {
 
               <Authenticated>
                 <DashboardAction />
-                <Link href="/doctor-dashboard">
-                  <Button
-                    size="lg"
-                    variant="ghost"
-                    className="text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 hover:bg-primary/10 hover:text-primary transition-all duration-300"
-                  >
-                    Doctor Portal
-                  </Button>
-                </Link>
+                <DoctorPortalAction />
               </Authenticated>
 
               <AuthLoading>
