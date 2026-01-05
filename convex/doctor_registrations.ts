@@ -58,6 +58,7 @@ async function assignExistingDataToNewDoctor(ctx: MutationCtx, newDoctorId: Id<"
             notes: (appointment.notes || "") + " [Reassigned to new doctor]"
         });
     }
+    
 
     console.log(`Reassigned ${appointmentsToReassign.length} appointments to new doctor`);
 

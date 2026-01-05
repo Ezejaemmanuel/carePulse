@@ -17,6 +17,7 @@ interface SeedResult {
   message: string;
 }
 
+
 export default function SeedPage() {
   const [isSeeding, setIsSeeding] = useState(false);
   const [progress, setProgress] = useState(0);
