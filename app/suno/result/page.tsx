@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +53,7 @@ interface SunoResponse {
   message?: string;
 }
 
-export default function SunoResultPage() {
+function SunoResultPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const taskId = searchParams.get('taskid');
@@ -396,5 +396,20 @@ export default function SunoResultPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SunoResultPageWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SunoResultPage />
+    </Suspense>
   );
 }
