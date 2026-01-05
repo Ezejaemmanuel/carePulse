@@ -1,5 +1,92 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { Doc, Id } from "./_generated/dataModel";
+
+// Helper function to automatically assign appointments and data to new doctor
+async function assignExistingDataToNewDoctor(ctx: MutationCtx, newDoctorId: Id<"doctors">, specialty: string) {
+    // Get all active doctors (excluding the new one)
+    const allDoctors = await ctx.db
+        .query("doctors")
+        .filter((q) => q.eq(q.field("status"), "active"))
+        .collect();
+
+    const existingDoctors = allDoctors.filter((d: Doc<"doctors">) => d._id !== newDoctorId);
+    if (existingDoctors.length === 0) return; // No existing doctors to reassign from
+
+    // Get pending and future appointments that can be reassigned
+    const now = Date.now();
+    const futureAppointments = await ctx.db
+        .query("appointments")
+        .filter((q) =>
+            q.and(
+                q.neq(q.field("status"), "completed"),
+                q.neq(q.field("status"), "cancelled"),
+                q.gte(q.field("date"), now)
+            )
+        )
+        .collect();
+
+    // Group appointments by doctor to understand current load
+    const doctorWorkloads = new Map<Id<"doctors">, number>();
+    for (const doctor of existingDoctors) {
+        const doctorAppointments = futureAppointments.filter((apt: Doc<"appointments">) => apt.doctorId === doctor._id);
+        doctorWorkloads.set(doctor._id, doctorAppointments.length);
+    }
+
+    // Find the doctor with the most appointments to reassign some to the new doctor
+    let maxWorkload = 0;
+    let doctorToReassignFrom: Id<"doctors"> | null = null;
+
+    for (const [doctorId, workload] of doctorWorkloads) {
+        if (workload > maxWorkload) {
+            maxWorkload = workload;
+            doctorToReassignFrom = doctorId;
+        }
+    }
+
+    if (!doctorToReassignFrom || maxWorkload <= 2) return; // Don't reassign if workload is low
+
+    // Reassign up to 20% of appointments from the busiest doctor to the new doctor
+    const appointmentsToReassign = futureAppointments
+        .filter((apt: Doc<"appointments">) => apt.doctorId === doctorToReassignFrom)
+        .slice(0, Math.max(1, Math.floor(maxWorkload * 0.2))); // At least 1, max 20%
+
+    // Update the appointments to assign them to the new doctor
+    for (const appointment of appointmentsToReassign) {
+        await ctx.db.patch(appointment._id, {
+            doctorId: newDoctorId,
+            notes: (appointment.notes || "") + " [Reassigned to new doctor]"
+        });
+    }
+
+    console.log(`Reassigned ${appointmentsToReassign.length} appointments to new doctor`);
+
+    // Also assign some existing patient data if the specialty matches
+    if (specialty && specialty !== "general") {
+        // Find patients who have had appointments with doctors of the same specialty
+        const specialtyDoctors = existingDoctors.filter((d: Doc<"doctors">) => d.specialty === specialty);
+        if (specialtyDoctors.length > 0) {
+            // Get patients who have seen doctors with the same specialty
+            const specialtyDoctorIds = specialtyDoctors.map((d: Doc<"doctors">) => d._id);
+            const specialtyAppointments = futureAppointments.filter((apt: Doc<"appointments">) =>
+                specialtyDoctorIds.includes(apt.doctorId)
+            );
+
+            // Take some of these appointments for the new doctor
+            const specialtyAppointmentsToReassign = specialtyAppointments
+                .slice(0, Math.min(5, specialtyAppointments.length)); // Take up to 5
+
+            for (const appointment of specialtyAppointmentsToReassign) {
+                await ctx.db.patch(appointment._id, {
+                    doctorId: newDoctorId,
+                    notes: (appointment.notes || "") + " [Specialty-matched reassignment]"
+                });
+            }
+
+            console.log(`Reassigned ${specialtyAppointmentsToReassign.length} specialty-matched appointments to new doctor`);
+        }
+    }
+}
 
 export const submitRegistration = mutation({
     args: {
@@ -28,72 +115,62 @@ export const submitRegistration = mutation({
             .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
             .unique();
 
-        // Check if any doctors exist to determine if this should be a superadmin
+        // Auto-approve all doctor registrations (no more waiting for admin approval)
         const allDoctors = await ctx.db.query("doctors").collect();
         const isFirstDoctor = allDoctors.length === 0;
 
         if (existing) {
-            if (existing.status === "pending") {
-                await ctx.db.patch(existing._id, {
-                    name: args.name,
-                    email: args.email,
-                    details: args.details,
-                    submittedAt: Date.now(),
-                });
-                return existing._id;
-            } else if (existing.status === "approved") {
+            if (existing.status === "approved") {
                 throw new Error("Already approved");
             }
 
-            // If rejected, allow resubmission
-            // If it's the first doctor (unlikely if they were rejected, but possible if they were the ONLY one and got rejected by... no one? logic edge case),
-            // we should probably still apply the rule, but let's keep it simple for resubmission: just pending.
-            // Actually, if they are the first one NOW (maybe previous ones were deleted?), they should be superadmin.
-            // But for simplicity, let's stick to: if resubmitting, go to pending.
-
+            // Update and auto-approve existing registration
             await ctx.db.patch(existing._id, {
                 name: args.name,
                 email: args.email,
                 details: args.details,
-                status: isFirstDoctor ? "approved" : "pending",
+                status: "approved",
                 submittedAt: Date.now(),
             });
 
-            if (isFirstDoctor) {
-                await ctx.db.insert("doctors", {
-                    userId: identity.subject,
-                    name: args.name,
-                    email: args.email,
-                    role: "superadmin",
-                    specialty: args.details.primarySpecialty,
-                    status: "active",
-                });
-            }
+            // Create doctor record
+            const doctorId = await ctx.db.insert("doctors", {
+                userId: identity.subject,
+                name: args.name,
+                email: args.email,
+                role: isFirstDoctor ? "superadmin" : "doctor",
+                specialty: args.details.primarySpecialty,
+                status: "active",
+            });
+
+            // Auto-assign existing appointments and data to new doctor
+            await assignExistingDataToNewDoctor(ctx, doctorId, args.details.primarySpecialty);
 
             return existing._id;
         }
 
-        const status = isFirstDoctor ? "approved" : "pending";
-
+        // Auto-approve new registration
         const id = await ctx.db.insert("doctor_registrations", {
             userId: identity.subject,
             name: args.name,
             email: args.email,
             details: args.details,
-            status: status,
+            status: "approved",
             submittedAt: Date.now(),
         });
 
-        if (isFirstDoctor) {
-            await ctx.db.insert("doctors", {
-                userId: identity.subject,
-                name: args.name,
-                email: args.email,
-                role: "superadmin",
-                specialty: args.details.primarySpecialty,
-                status: "active",
-            });
-        }
+        // Create doctor record immediately
+        const doctorId = await ctx.db.insert("doctors", {
+            userId: identity.subject,
+            name: args.name,
+            email: args.email,
+            role: isFirstDoctor ? "superadmin" : "doctor",
+            specialty: args.details.primarySpecialty,
+            status: "active",
+        });
+
+        // Auto-assign existing appointments and data to new doctor
+        await assignExistingDataToNewDoctor(ctx, doctorId, args.details.primarySpecialty);
 
         return id;
     },
@@ -169,7 +246,7 @@ export const approveRegistration = mutation({
         }
 
         // Create doctor record
-        await ctx.db.insert("doctors", {
+        const doctorId = await ctx.db.insert("doctors", {
             userId: registration.userId,
             name: registration.name,
             email: registration.email,
@@ -177,6 +254,9 @@ export const approveRegistration = mutation({
             specialty: registration.details.primarySpecialty,
             status: "active",
         });
+
+        // Auto-assign existing appointments and data to new doctor
+        await assignExistingDataToNewDoctor(ctx, doctorId, registration.details.primarySpecialty);
 
         // Update registration status
         await ctx.db.patch(args.registrationId, { status: "approved" });

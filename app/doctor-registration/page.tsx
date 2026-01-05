@@ -60,6 +60,8 @@ export default function DoctorRegistrationPage() {
 
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [countdown, setCountdown] = useState(10);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema as any),
@@ -137,12 +139,26 @@ export default function DoctorRegistrationPage() {
                     bio: values.bio,
                 }
             });
-            toast.success("Registration submitted successfully!");
-            router.push("/doctor-dashboard");
+
+            // Start verification countdown
+            setIsVerifying(true);
+            setIsSubmitting(false);
+
+            const interval = setInterval(() => {
+                setCountdown((prev) => {
+                    if (prev <= 1) {
+                        clearInterval(interval);
+                        toast.success("Registration verified successfully!");
+                        router.push("/doctor-dashboard");
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+
         } catch (error) {
             console.error(error);
             toast.error("Failed to submit registration. Please try again.");
-        } finally {
             setIsSubmitting(false);
         }
     }
@@ -443,25 +459,46 @@ export default function DoctorRegistrationPage() {
                                     </div>
                                 )}
 
-                                <CardFooter className="flex justify-between px-0 pt-4">
-                                    {step > 1 && (
-                                        <Button type="button" variant="outline" onClick={prevStep}>
-                                            Previous
-                                        </Button>
-                                    )}
-                                    {step < 3 ? (
-                                        <Button type="button" className="ml-auto" onClick={nextStep}>
-                                            Next
-                                        </Button>
-                                    ) : (
-                                        <Button type="submit" className="ml-auto" disabled={isSubmitting}>
-                                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Submit Registration
-                                        </Button>
-                                    )}
-                                </CardFooter>
+                                {!isVerifying && (
+                                    <CardFooter className="flex justify-between px-0 pt-4">
+                                        {step > 1 && (
+                                            <Button type="button" variant="outline" onClick={prevStep}>
+                                                Previous
+                                            </Button>
+                                        )}
+                                        {step < 3 ? (
+                                            <Button type="button" className="ml-auto" onClick={nextStep}>
+                                                Next
+                                            </Button>
+                                        ) : (
+                                            <Button type="submit" className="ml-auto" disabled={isSubmitting}>
+                                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Submit Registration
+                                            </Button>
+                                        )}
+                                    </CardFooter>
+                                )}
                             </form>
                         </Form>
+
+                        {isVerifying && (
+                            <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                </div>
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-lg font-semibold">Verifying Your Registration</h3>
+                                    <p className="text-muted-foreground">
+                                        Please wait while we verify your medical credentials...
+                                    </p>
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <span className="text-2xl font-bold text-primary">{countdown}</span>
+                                        <span className="text-muted-foreground">seconds remaining</span>
+                                    </div>
+                                </div>
+                                <Progress value={(10 - countdown) / 10 * 100} className="w-full max-w-xs" />
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             </div>

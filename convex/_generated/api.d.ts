@@ -21,6 +21,7 @@ import type * as schema_medical_records from "../schema/medical_records.js";
 import type * as schema_messages from "../schema/messages.js";
 import type * as schema_patients from "../schema/patients.js";
 import type * as schema_vitals from "../schema/vitals.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   "schema/messages": typeof schema_messages;
   "schema/patients": typeof schema_patients;
   "schema/vitals": typeof schema_vitals;
+  seed: typeof seed;
 }>;
 
 /**

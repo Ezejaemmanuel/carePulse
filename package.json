@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "npx convex run seed:seedDatabase"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.35.2",
@@ -64,6 +65,7 @@
     "zod": "3.24.1"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.2.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

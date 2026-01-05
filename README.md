@@ -18,6 +18,39 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Database Seeding
+
+To populate the database with fake data for testing and development:
+
+### Option 1: Web Interface (Recommended)
+Visit `/seed` in your browser and click the "Start Seeding" button for a visual seeding experience with progress tracking.
+
+### Option 2: Command Line
+```bash
+npm run seed
+# or
+pnpm seed
+```
+
+This will create:
+- 100 additional fake patients with complete profiles
+- Additional doctors if needed (maintains at least 20 total doctors)
+- 200 appointments (past and future) assigned to existing doctors
+- Medical records for completed appointments
+- Vital signs data for patients
+- Messages between patients and doctors
+- System logs
+
+**Note:** The seed function works with existing doctors - it will create appointments for doctors that are already in your database!
+
+**Note:** Doctor registrations are now automatically approved after submission (no admin approval required).
+
+## Features
+
+- **Automatic Doctor Verification**: When doctors register, they are automatically verified after a 10-second countdown
+- **Comprehensive Patient Complaints**: Uses a large array of realistic medical complaints instead of generic faker data
+- **Interactive Data**: All data is interconnected with proper relationships between patients, doctors, appointments, and medical records
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
