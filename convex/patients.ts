@@ -165,6 +165,35 @@ export const getAvailableSlots = query({
     },
 });
 
+export const checkAppointmentConflict = query({
+    args: {
+        doctorId: v.id("doctors"),
+        date: v.number(),
+    },
+    handler: async (ctx, args) => {
+        // Check if the slot is already booked
+        const existing = await ctx.db
+            .query("appointments")
+            .withIndex("by_doctor_date", (q) => q.eq("doctorId", args.doctorId).eq("date", args.date))
+            .first();
+
+        if (existing && existing.status !== "cancelled") {
+            // Fetch doctor details for the error message
+            const doctor = await ctx.db.get(args.doctorId);
+
+            return {
+                hasConflict: true,
+                doctorName: doctor?.name,
+                appointmentTime: args.date,
+            };
+        }
+
+        return {
+            hasConflict: false,
+        };
+    },
+});
+
 export const bookAppointment = mutation({
     args: {
         doctorId: v.id("doctors"),

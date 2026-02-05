@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,20 +9,37 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/ui/alert-dialog";
 import { format } from "date-fns";
 import { Loader2, CheckCircle2, Calendar as CalendarIcon, User, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { Id } from "@/convex/_generated/dataModel";
 
 export function AppointmentWizard() {
     const router = useRouter();
+    const convex = useConvex();
     const [step, setStep] = useState(1);
     const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
     const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
     const [reason, setReason] = useState("");
     const [isBooking, setIsBooking] = useState(false);
+    const [conflictDialogOpen, setConflictDialogOpen] = useState(false);
+    const [conflictDetails, setConflictDetails] = useState<{
+        doctorName?: string;
+        appointmentTime?: number;
+    }>({});
 
     const doctors = useQuery(api.patients.getDoctors);
     const availableSlots = useQuery(
@@ -49,8 +66,26 @@ export function AppointmentWizard() {
 
         setIsBooking(true);
         try {
+            // First, check for conflicts proactively
+            const conflictCheck = await convex.query(api.patients.checkAppointmentConflict, {
+                doctorId: selectedDoctorId as Id<"doctors">,
+                date: selectedSlot,
+            });
+
+            if (conflictCheck.hasConflict) {
+                // Show AlertDialog with conflict details
+                setConflictDetails({
+                    doctorName: conflictCheck.doctorName,
+                    appointmentTime: conflictCheck.appointmentTime,
+                });
+                setConflictDialogOpen(true);
+                setIsBooking(false);
+                return;
+            }
+
+            // No conflict, proceed with booking
             await bookAppointment({
-                doctorId: selectedDoctorId as any,
+                doctorId: selectedDoctorId as Id<"doctors">,
                 date: selectedSlot,
                 reason: reason,
             });
@@ -61,6 +96,12 @@ export function AppointmentWizard() {
             toast.error("Failed to book appointment. Please try again.");
             setIsBooking(false);
         }
+    };
+
+    const handleSelectDifferentTime = () => {
+        setConflictDialogOpen(false);
+        setStep(2);
+        setSelectedSlot(null);
     };
 
     const selectedDoctor = doctors?.find(d => d._id === selectedDoctorId);
@@ -279,6 +320,32 @@ export function AppointmentWizard() {
                     )}
                 </CardFooter>
             </Card>
+
+            {/* Conflict Alert Dialog */}
+            <AlertDialog open={conflictDialogOpen} onOpenChange={setConflictDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Time Slot Unavailable</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {conflictDetails.doctorName && conflictDetails.appointmentTime ? (
+                                <>
+                                    This appointment slot with <strong>Dr. {conflictDetails.doctorName}</strong> at{" "}
+                                    <strong>{format(new Date(conflictDetails.appointmentTime), "h:mm a")}</strong> has
+                                    already been booked by another patient.
+                                </>
+                            ) : (
+                                "This time slot is no longer available. Please select a different time."
+                            )}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleSelectDifferentTime}>
+                            Select Different Time
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
