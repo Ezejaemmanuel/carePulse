@@ -648,7 +648,12 @@ async function sendMessage() {
 }
 
 async function bookAppointment() {
-  if (!currentPatient || !selectedDoctorId || !selectedTimeSlot) {
+  if (!currentPatient) {
+    showToast('Please complete your patient profile first', 'error');
+    return;
+  }
+  
+  if (!selectedDoctorId || selectedTimeSlot === null) {
     showToast('Please select a doctor, date, and time slot', 'error');
     return;
   }

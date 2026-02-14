@@ -1,4 +1,5 @@
 import { AuthService } from '../services/auth.service';
+import { DatabaseService } from '../services/db.service';
 import { initializeDatabase } from '../utils/seed.utils';
 import '../utils/theme.utils';
 
@@ -24,6 +25,36 @@ function showToast(message: string, type: 'success' | 'error' | 'info' = 'info')
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+// Toggle patient fields visibility based on role selection
+const signupRoleSelect = document.getElementById('signup-role') as HTMLSelectElement;
+const patientFields = document.getElementById('patient-fields');
+
+function togglePatientFields() {
+    const role = signupRoleSelect?.value;
+    if (patientFields) {
+        if (role === 'patient') {
+            patientFields.classList.remove('hidden');
+            // Make patient fields required
+            patientFields.querySelectorAll('input, select, textarea').forEach((field: any) => {
+                if (field.id !== 'signup-allergies' && field.id !== 'signup-conditions') {
+                    field.required = true;
+                }
+            });
+        } else {
+            patientFields.classList.add('hidden');
+            // Make patient fields optional
+            patientFields.querySelectorAll('input, select, textarea').forEach((field: any) => {
+                field.required = false;
+            });
+        }
+    }
+}
+
+// Initialize patient fields visibility
+togglePatientFields();
+
+signupRoleSelect?.addEventListener('change', togglePatientFields);
 
 // Tab switching
 const signinTab = document.getElementById('signin-tab');
@@ -101,9 +132,41 @@ signupFormElement?.addEventListener('submit', async (e) => {
 
     try {
         const user = await AuthService.signUp(email, password, role);
+        
+        // If user is a patient, create patient profile immediately
+        if (role === 'patient') {
+            const name = (document.getElementById('signup-name') as HTMLInputElement).value;
+            const phone = (document.getElementById('signup-phone') as HTMLInputElement).value;
+            const dob = (document.getElementById('signup-dob') as HTMLInputElement).value;
+            const gender = (document.getElementById('signup-gender') as HTMLSelectElement).value;
+            const bloodGroup = (document.getElementById('signup-blood-group') as HTMLSelectElement).value;
+            const address = (document.getElementById('signup-address') as HTMLTextAreaElement).value;
+            const emergencyContactName = (document.getElementById('signup-emergency-contact') as HTMLInputElement).value;
+            const emergencyContactRelation = (document.getElementById('signup-emergency-relation') as HTMLInputElement).value;
+            const emergencyContactPhone = (document.getElementById('signup-emergency-phone') as HTMLInputElement).value;
+
+            // Create patient profile
+            DatabaseService.createPatient({
+                userId: user.id,
+                name,
+                email,
+                phone,
+                dob,
+                gender: gender as 'male' | 'female' | 'other',
+                address,
+                bloodGroup,
+                allergies: '',
+                chronicConditions: '',
+                emergencyContactName,
+                emergencyContactRelation,
+                emergencyContactPhone,
+                createdAt: Date.now(),
+            });
+        }
+
         showToast('Account created successfully!', 'success');
 
-        // Redirect based on role (doctor and admin both go to admin dashboard)
+        // Redirect based on role
         setTimeout(() => {
             if (user.role === 'patient') {
                 window.location.href = '/patient-dashboard.html';
