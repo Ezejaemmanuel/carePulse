@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CarePulse Local - Modern Healthcare Management</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body class="bg-gray-50 dark:bg-black transition-colors">
+  <!-- Navigation -->
+  <nav class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+              </path>
+            </svg>
+          </div>
+          <span class="font-heading text-2xl font-bold text-gray-900 dark:text-white">CarePulse</span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- Dark Mode Toggle -->
+          <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-700 dark:text-gray-300" fill="currentColor"
+              viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-700 dark:text-gray-300"
+              fill="currentColor" viewBox="0 0 20 20">
+              <path
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                fill-rule="evenodd" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+
+          <a href="/auth.html"
+            class="px-6 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition">
+            Get Started
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto">
+        <h1 class="font-heading text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+          Modern Healthcare Management
+          <span class="text-primary-600">Made Simple</span>
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+          CarePulse Local brings comprehensive healthcare management to your fingertips.
+          Book appointments, track vitals, and manage medical records - all in one place.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/auth.html"
+            class="px-8 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition text-lg">
+            Get Started Free
+          </a>
+          <a href="#features"
+            class="px-8 py-3 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition text-lg">
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-black">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="font-heading text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          Everything You Need
+        </h2>
+        <p class="text-xl text-gray-600 dark:text-gray-300">
+          Comprehensive features for patients, doctors, and administrators
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Easy Appointment Booking</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Schedule appointments with available doctors in just a few clicks. Real-time availability
+            checking.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Medical Records</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Access your complete medical history, prescriptions, and diagnoses anytime, anywhere.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Vitals Tracking</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Monitor your health metrics including blood pressure, glucose, weight, and heart rate.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Secure Messaging</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Communicate directly with your healthcare providers through secure messaging.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Privacy First</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            All data stored locally on your device. Your privacy is our top priority.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z">
+              </path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Lightning Fast</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Built with modern web technologies for instant access and smooth performance.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="font-heading text-4xl font-bold text-gray-900 dark:text-white mb-4">
+        Ready to Get Started?
+      </h2>
+      <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">
+        Join CarePulse today and experience modern healthcare management.
+      </p>
+      <a href="/auth.html"
+        class="inline-block px-8 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition text-lg">
+        Create Your Account
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto text-center">
+      <p class="text-gray-600 dark:text-gray-400">
+        &copy; 2026 CarePulse Local. All rights reserved.
+      </p>
+      <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">
+        Demo application - Data stored locally in your browser
+      </p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/pages/landing.ts"></script>
+</body>
+
+</html>
